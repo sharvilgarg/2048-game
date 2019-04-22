@@ -1,0 +1,911 @@
+#include<stdlib.h>
+
+#include<iostream.h>
+
+#include<conio.h>
+
+#include<graphics.h>
+
+#include<dos.h>
+
+#include<math.h>
+
+#include<time.h>
+
+#include<fstream.h>
+
+#include<string.h>
+
+
+extern int scoring = 0;
+
+void loading() {
+
+  int x, y;
+  x = 0;
+  y = 0;
+  gotoxy(x, y);
+  textbackground(0);
+  textcolor(3);
+  for (y = 0; y <= 74; y++) {
+    for (x = 0; x <= 23; x++) {
+      delay(.1);
+      cprintf(" ");
+    }
+  }
+  cprintf("                                        ");
+
+  int j = 0;
+  x = 40;
+  y = 13;
+  while (j < 3) {
+    clrscr();
+    gotoxy(37.5, 10);
+
+    cprintf("Loading");
+
+    delay(100);
+
+    gotoxy(x, y);
+    cprintf("|");
+
+    delay(100);
+
+    gotoxy(x - 1, y + 1);
+    cprintf("\\");
+    delay(100);
+
+    gotoxy(x - 2, y + 2);
+    cprintf("--");
+
+    delay(100);
+
+    gotoxy(x - 1, y + 3);
+    cprintf("/");
+
+    delay(100);
+
+    gotoxy(x, y + 4);
+    cprintf("|");
+
+    delay(100);
+
+    gotoxy(x + 1, y + 3);
+    cprintf("\\");
+
+    delay(100);
+
+    gotoxy(x + 2, y + 2);
+    cprintf("--");
+
+    delay(100);
+
+    gotoxy(x + 1, y + 1);
+    cprintf("/");
+
+    delay(100);
+
+    j++;
+  }
+  clrscr();
+}
+
+struct highscorer {
+  char fname[50], lname[50];
+  int score;
+};
+
+class Game {
+  private:
+    int array[4][4];
+  float added;
+  public:
+    int highscore() {
+      ifstream fin;
+      char fname[50], lname[50];
+      int score;
+      highscorer hs[10];
+      fin.open("hiscore.txt");
+      if (!fin) {
+        cerr << "Cannot open" << endl;
+      }
+      int i = 0;
+      while (fin >> fname >> lname >> score) {
+        strcpy(hs[i].fname, fname);
+        strcpy(hs[i].lname, lname);
+        hs[i].score = score;
+        i++;
+      }
+      fin.close();
+      ofstream fout;
+      fout.open("hiscore.txt");
+      i = 0;
+      while (hs[i].score > scoring) {
+        i++;
+      }
+
+      highscorer n1;
+      highscorer temp;
+      if (i < 10) {
+        int x, y;
+        x = 25;
+        y = 2;
+        textcolor(BLUE);
+        cprintf("Congratulations, you have set a new highscore ");
+        gotoxy(2, 3);
+        cprintf("Enter first name ");
+        cin >> n1.fname;
+        gotoxy(2, 5);
+        cprintf("Enter last name ");
+        cin >> n1.lname;
+        n1.score = scoring;
+
+        int h = 9;
+
+        while (h >= i) {
+          clrscr();
+          highscorer tempo[10];
+          for (int t = 0; t < 10; t++) {
+            tempo[t] = hs[t];
+          }
+          tempo[h] = n1;
+          int d = h + 1;
+          x = 25;
+          y = 4;
+
+          if (d != 10) {
+            while (d < 10) {
+              tempo[d] = hs[d - 1];
+              d++;
+            }
+          }
+
+          textcolor(15);
+          gotoxy(x + 7, 1);
+
+          cprintf("Highscores");
+
+          for (int v = 0; v < 10; v++) {
+
+            gotoxy(x, y);
+            textcolor(12);
+            if (v == h) {
+              textcolor(CYAN + BLINK);
+            }
+
+            cprintf(" %i", v + 1);
+            cprintf(". ");
+            cprintf(tempo[v].fname);
+            cprintf(" ");
+
+            cprintf(tempo[v].lname);
+            cprintf(" ");
+
+            gotoxy(45, y);
+            cprintf(" %i", tempo[v].score);
+            y += 2;
+
+            textcolor(12);
+          }
+          delay(500);
+
+          h--;
+
+        }
+
+        for (int j = i; j < 10; j++) {
+          temp = hs[j];
+          hs[j] = n1;
+          n1 = temp;
+        }
+
+      } else {
+        textcolor(15);
+        int x, y;
+
+        x = 25;
+        gotoxy(x + 7, 1);
+        cprintf("Highscores");
+
+        y = 4;
+        for (int v = 0; v < 10; v++) {
+
+          gotoxy(x, y);
+          textcolor(12);
+          if (v == i) {
+            textcolor(BLUE + BLINK);
+          }
+          cprintf(" %i", v + 1);
+          cprintf(". ");
+          cprintf(hs[v].fname);
+
+          cprintf(" ");
+
+          cprintf(hs[v].lname);
+          cprintf(" ");
+
+          gotoxy(45, y);
+          cprintf(" %i", hs[v].score);
+          y += 2;
+
+          textcolor(12);
+        }
+
+      }
+      getch();
+
+      for (int j = 0; j < 10; j++) {
+        fout << hs[j].fname << " " << hs[j].lname << " " << hs[j].score << endl;
+
+      }
+      fout.close();
+
+      fin.open("hiscore.txt");
+      if (!fin) {
+        cerr << "Cannot open" << endl;
+      }
+      i = 0;
+      while (fin >> fname >> lname >> score) {
+        strcpy(hs[i].fname, fname);
+        strcpy(hs[i].lname, lname);
+        hs[i].score = score;
+        i++;
+      }
+      getch();
+
+    }
+
+  void gameboard() {
+
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        array[i][j] = 0;
+      }
+    }
+    inputnumbers();
+    inputnumbers();
+
+  }
+
+  int empty() {
+    for (int i = 0; i < 4; ++i) {
+      for (int j = 0; j < 4; ++j) {
+        if (array[i][j] == 0) {
+          return 1;
+        }
+      }
+    }
+    return 0;
+  }
+  int lost() {
+    int flag = 1;
+    if (empty() == 1) {
+      return 0;
+    } else {
+      for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+          if (j == 3) {
+            if ((array[i][j] == array[i + 1][j]) && (i != 3)) {
+              flag = 0;
+            }
+
+          } else if (i == 3) {
+            if ((array[i][j] == array[i][j + 1]) && (j != 3)) {
+              flag = 0;
+            }
+          } else {
+            if (array[i][j] == array[i + 1][j]) {
+              flag = 0;
+            }
+            if (array[i][j] == array[i][j + 1]) {
+              flag = 0;
+            }
+          }
+
+        }
+      }
+
+      return flag;
+    }
+
+    return 1;
+  }
+
+  int inputnumbers() {
+    if (empty() == 1) {
+      int randy;
+      int numbers[16] = {
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        4,
+        4,
+        8
+      };
+      srand(time(NULL));
+      int c, r;
+      while (1) {
+        randy = rand() % 16;
+        c = randy / 4;
+        r = randy % 4;
+        if (!(array[c][r] == 0)) {
+
+          continue;
+
+        } else {
+
+          array[c][r] = numbers[randy];
+          break;
+
+        }
+      }
+    }
+
+  }
+  int step(int a) {
+    int randy;
+    srand(time(NULL));
+    randy = rand() % 10;
+    getch();
+    a = getch();
+    switch (a) {
+    case 72:
+      added = sqrt(up());
+      while (added > 1)
+        added *= .1;
+      added = randy * (asin(added)) * 180 / 3.14159265;
+      scoring += added;
+      return added;
+    case 80:
+      added = sqrt(down());
+      while (added > 1)
+        added *= .1;
+      added = randy * (asin(added)) * 180 / 3.14159265;
+      scoring += added;
+      return added;
+
+    case 75:
+      added = sqrt(left());
+      while (added > 1)
+        added *= .1;
+      added = randy * (asin(added)) * 180 / 3.14159265;
+      scoring += added;
+      return added;
+    case 77:
+      added = sqrt(right());
+      while (added > 1)
+        added *= .1;
+      added = randy * (asin(added)) * 180 / 3.14159265;
+      scoring += added;
+      return added;
+    case 27:
+      return -1;
+
+    default:
+      return 0;
+    }
+  }
+  int up() {
+    int score = 0;
+    int c, r;
+    for (c = 0; c < 4; c++) {
+      if (array[2][c] == array[3][c]) {
+        for (r = 0; r < 1; r++) {
+          if (array[r][c] == array[r + 1][c]) {
+            array[r][c] = array[r][c] + array[r + 1][c];
+            array[r + 1][c] = 0;
+            score = score + array[r][c];
+          }
+          if (array[r][c] == 0) {
+            array[r][c] = array[r + 1][c];
+            array[r + 1][c] = 0;
+          }
+        }
+        array[2][c] = array[2][c] + array[3][c];
+        array[3][c] = 0;
+        score = score + array[2][c];
+        if (array[1][c] == 0) {
+          array[1][c] = array[2][c];
+          array[2][c] = 0;
+          if (array[0][c] == 0) {
+            array[0][c] = array[1][c];
+            array[1][c] = 0;
+          }
+
+        }
+      } else {
+        for (int x = 0; x < 4; x++) {
+          if (array[0][c] == 0) {
+            array[0][c] = array[1][c];
+            array[1][c] = array[2][c];
+            array[2][c] = array[3][c];
+            array[3][c] = 0;
+          }
+
+        }
+
+        for (r = 0; r < 3; r++) {
+          if (array[r][c] == array[r + 1][c]) {
+            array[r][c] = array[r][c] + array[r + 1][c];
+            array[r + 1][c] = 0;
+            score = score + array[r][c];
+          }
+          if (array[r][c] == 0) {
+            array[r][c] = array[r + 1][c];
+            array[r + 1][c] = 0;
+          }
+        }
+
+      }
+
+    }
+    return score;
+
+  }
+
+  int down() {
+    int score = 0;
+    int c, r;
+    for (c = 0; c < 4; c++) {
+      if (array[0][c] == array[1][c]) {
+        for (r = 3; r > 2; r--) {
+          if (array[r][c] == array[r - 1][c]) {
+            array[r][c] = array[r][c] + array[r - 1][c];
+            array[r - 1][c] = 0;
+            score = score + array[r][c];
+          }
+          if (array[r][c] == 0) {
+            array[r][c] = array[r - 1][c];
+            array[r - 1][c] = 0;
+          }
+        }
+        array[1][c] = array[1][c] + array[0][c];
+        array[0][c] = 0;
+        score = score + array[1][c];
+        if (array[2][c] == 0) {
+          array[2][c] = array[1][c];
+          array[1][c] = 0;
+          if (array[3][c] == 0) {
+            array[3][c] = array[2][c];
+            array[2][c] = 0;
+          }
+
+        }
+      } else {
+        for (int j = 0; j < 4; j++) {
+          if (array[3][c] == 0) {
+            array[3][c] = array[2][c];
+            array[2][c] = array[1][c];
+            array[1][c] = array[0][c];
+            array[0][c] = 0;
+
+          }
+
+        }
+
+        for (r = 0; r < 3; r++) {
+          if (array[r][c] == array[r + 1][c]) {
+            array[r + 1][c] = array[r + 1][c] + array[r][c];
+            array[r][c] = 0;
+            score = score + array[r + 1][c];
+          }
+          if (array[r + 1][c] == 0) {
+            array[r + 1][c] = array[r][c];
+            array[r][c] = 0;
+          }
+        }
+
+      }
+
+    }
+    return score;
+
+  }
+
+  int left() {
+    int score = 0;
+    int c, r;
+    for (r = 0; r < 4; r++) {
+      if (array[r][3] == array[r][2]) {
+        for (c = 0; c < 1; c++) {
+          if (array[r][c] == array[r][c + 1]) {
+            array[r][c] = array[r][c] + array[r][c + 1];
+            array[r][c + 1] = 0;
+            score = score + array[r][c];
+          }
+          if (array[r][c] == 0) {
+            array[r][c] = array[r][c + 1];
+            array[r][c + 1] = 0;
+          }
+
+        }
+        array[r][2] = array[r][2] + array[r][3];
+        array[r][3] = 0;
+        score = score + array[r][2];
+        if (array[r][1] == 0) {
+          array[r][1] = array[r][2];
+          array[r][2] = 0;
+          if (array[r][0] == 0) {
+            array[r][0] = array[r][1];
+            array[r][1] = 0;
+          }
+        }
+      } else {
+        for (int y = 0; y < 4; y++) {
+          if (array[r][0] == 0) {
+            array[r][0] = array[r][1];
+            array[r][1] = array[r][2];
+            array[r][2] = array[r][3];
+            array[r][3] = 0;
+          }
+
+        }
+
+        for (c = 0; c < 3; c++) {
+          if (array[r][c] == array[r][c + 1]) {
+            array[r][c] = array[r][c] + array[r][c + 1];
+            array[r][c + 1] = 0;
+            score = score + array[r][c];
+          }
+          if (array[r][c] == 0) {
+            array[r][c] = array[r][c + 1];
+            array[r][c + 1] = 0;
+          }
+        }
+
+      }
+
+    }
+
+    return score;
+  }
+
+  int right() {
+    int score = 0;
+    int c, r;
+    for (r = 0; r < 4; r++) {
+      if (array[r][0] == array[r][1]) {
+        for (c = 3; c > 2; c--) {
+          if (array[r][c] == array[r][c - 1]) {
+            array[r][c] = array[r][c] + array[r][c - 1];
+            array[r][c - 1] = 0;
+            score = score + array[r][c];
+          }
+          if (array[r][c] == 0) {
+            array[r][c] = array[r][c - 1];
+            array[r][c - 1] = 0;
+          }
+
+        }
+        array[r][1] = array[r][1] + array[r][0];
+        array[r][0] = 0;
+        score = score + array[r][1];
+        if (array[r][2] == 0) {
+          array[r][2] = array[r][1];
+          array[r][1] = 0;
+          if (array[r][3] == 0) {
+            array[r][3] = array[r][2];
+            array[r][2] = 0;
+          }
+
+        }
+      } else {
+        for (int k = 0; k < 4; k++) {
+          if (array[r][3] == 0) {
+            array[r][3] = array[r][2];
+            array[r][2] = array[r][1];
+            array[r][1] = array[r][0];
+            array[r][0] = 0;
+
+          }
+
+        }
+
+        for (c = 0; c < 3; c++) {
+          if (array[r][c] == array[r][c + 1]) {
+            array[r][c + 1] = array[r][c] + array[r][c + 1];
+            array[r][c] = 0;
+            score = score + array[r][c + 1];
+          }
+          if (array[r][c + 1] == 0) {
+            array[r][c + 1] = array[r][c];
+            array[r][c] = 0;
+          }
+        }
+
+      }
+
+    }
+    return score;
+  }
+
+  void makeboard(int addedScore) {
+    clrscr();
+    int x, y;
+    x = 0;
+    y = 0;
+    gotoxy(x, y);
+    textbackground(CYAN);
+
+    for (y = 0; y <= 74; y++) {
+      for (x = 0; x <= 23; x++) {
+        delay(.1);
+        cprintf(" ");
+      }
+    }
+    cprintf("                                        ");
+
+    textcolor(0);
+
+    x = 64;
+    y = 4;
+
+    gotoxy(x, y);
+    cprintf("Score: %i", scoring);
+
+    if (addedScore != 0) {
+      x += 5;
+      y++;
+      gotoxy(x, y);
+      cprintf("+ %i", addedScore);
+    }
+
+    for (x = 20; x < 65; x += 10) {
+      for (y = 3; y < 15; y++) {
+        gotoxy(x, y);
+        cprintf("|");
+      }
+
+    }
+    for (y = 2; y < 15; y += 3) {
+      for (x = 21; x < 61; x++) {
+        gotoxy(x, y);
+        switch (x) {
+        case 30:
+          continue;
+        case 40:
+          continue;
+        case 50:
+          continue;
+        case 60:
+          continue;
+
+        }
+
+        cprintf("_");
+      }
+
+    }
+    y = 4;
+    for (int k = 0; k < 4; k++) {
+      x = 25;
+      for (int m = 0; m < 4; m++) {
+
+        gotoxy(x, y);
+        int color;
+        color = array[k][m];
+        while (color > 2048)
+          color /= 2;
+        switch (color) {
+        case 0:
+          textcolor(3);
+          break;
+        case 2:
+          textcolor(1);
+          break;
+        case 4:
+          textcolor(15);
+          break;
+        case 8:
+          textcolor(9);
+          break;
+        case 16:
+          textcolor(4);
+          break;
+        case 32:
+          textcolor(5);
+          break;
+        case 64:
+          textcolor(10);
+          break;
+        case 128:
+          textcolor(6);
+          break;
+        case 256:
+          textcolor(12);
+          break;
+        case 512:
+          textcolor(13);
+          break;
+        case 1024:
+          textcolor(14);
+          break;
+        case 2048:
+          textcolor(11);
+          break;
+
+        }
+        cprintf("%i", array[k][m]);
+        x += 10;
+        delay(5);
+      }
+      cprintf("\n");
+      y += 3;
+    }
+  }
+
+  void credits() {
+    int i = 25;
+    while ((i + 25) > 0) {
+      delay(150);
+      clrscr();
+      textcolor(15);
+
+      if (!(i < 1)) {
+        gotoxy(36, i);
+        cprintf("Developers");
+      }
+
+      if (!((i + 5) > 25)) {
+        if (i + 5 > 1) {
+
+          gotoxy(33, i + 5);
+          cprintf("Aahaan Thapliyal");
+        }
+      }
+      if (!((i + 10) > 25)) {
+        if (i + 10 > 1) {
+
+          gotoxy(35, i + 10);
+
+          cprintf("Sharvil Garg");
+        }
+      }
+      if (!((i + 15) > 25)) {
+        if (i + 15 > 1) {
+
+          gotoxy(35, i + 15);
+
+          cprintf("Pranava Dhar");
+        }
+      }
+      i -= 1;
+      gotoxy(0, 0);
+
+    }
+  }
+
+  void initial() {
+    int x, y, i;
+    x = 0;
+    y = 0;
+    char welcome[100] = "Welcome to the game 2048.";
+    char moves[60] = "Moves are up, down, left and right. Use your arrow keys.";
+    char escape[30] = "Press escape to exit.";
+    char endgame[30] = "Try and get to 2048!";
+    gotoxy(x, y);
+    textbackground(11);
+    textcolor(15);
+    for (y = 0; y <= 74; y++) {
+      for (x = 0; x <= 23; x++) {
+        delay(.1);
+        cprintf(" ");
+      }
+    }
+    cprintf("                                        ");
+    gotoxy(15, 10);
+    i = 0;
+
+    while (i < 25) {
+      cprintf("%c", welcome[i]);
+      i++;
+      delay(40);
+    }
+
+    gotoxy(15, 14);
+    i = 0;
+    while (i < 56) {
+      cprintf("%c", moves[i]);
+      i++;
+      delay(40);
+    }
+
+    gotoxy(15, 16);
+    i = 0;
+    while (i < 21) {
+      cprintf("%c", escape[i]);
+      i++;
+      delay(40);
+    }
+
+    gotoxy(15, 18);
+    i = 0;
+    while (i < 20) {
+      cprintf("%c", endgame[i]);
+      i++;
+      delay(40);
+
+    }
+    delay(20);
+  }
+  void run() {
+    int add, a;
+
+    loading();
+    gameboard();
+
+    makeboard(0);
+
+    while (1) {
+
+      if (lost() == 0) {
+        add = step(a);
+
+      } else if (lost() == 1) {
+
+        gotoxy(32, 17);
+        cprintf("You have lost");
+        getch();
+        break;
+      }
+      if (add < 0) {
+
+        break;
+      } else {
+
+        inputnumbers();
+        makeboard(add);
+
+      }
+    }
+    clrscr();
+    loading();
+    highscore();
+
+  }
+
+};
+
+void main() {
+
+  Game test1 = new Game();
+
+  test1.initial();
+  getch();
+
+  while (1) {
+    Game test;
+
+    scoring = 0;
+
+    test.run();
+
+    clrscr();
+    int x, y;
+    x = 0;
+    y = 5;
+    gotoxy(x, y);
+    cprintf("Do you want to play again? Press esc to exit and any other key to play again ");
+
+    int playAgain;
+    getch();
+    playAgain = getch();
+    if (playAgain == 27) {
+
+      test.credits();
+      break;
+
+    }
+  }
+
+}
